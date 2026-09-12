@@ -153,8 +153,7 @@ streaming-subscription-churn-model/
 
 ---
 
-## 👥 8. Kontributor & Pengesahan
+## 👥 8. Kontributor
 
 - **Nama Peserta**: Soni
 - **Program**: Google Developer Groups (GDG) — Final Project Machine Learning
-- **Tenggat Pengumpulan**: September 2026

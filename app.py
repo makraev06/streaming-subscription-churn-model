@@ -8,269 +8,200 @@ import plotly.graph_objects as go
 from src.preprocessing import FeatureEngineeringTransformer, get_risk_tier
 
 # ==============================================================================
-# 1. PAGE CONFIGURATION & SYSTEM META
+# 1. KONFIGURASI HALAMAN
 # ==============================================================================
 st.set_page_config(
-    page_title="StreamPulse AI | Churn Intelligence & Retention Studio",
-    page_icon="🎧",
+    page_title="Streaming Churn Predictor",
+    page_icon="🎵",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
 # ==============================================================================
-# 2. VIBRANT & BRIGHT MODERN SAAS DESIGN SYSTEM (CSS)
+# 2. DESAIN TAMPILAN BERSIH & MINIMALIS (LIGHT MODE)
 # ==============================================================================
-st.markdown("""
+bg_main = "#F8FAFC"
+bg_card = "#FFFFFF"
+border_color = "#E2E8F0"
+text_main = "#0F172A"
+text_muted = "#64748B"
+accent_primary = "#4F46E5"
+accent_primary_hover = "#4338CA"
+tab_bg = "#F1F5F9"
+tab_active_bg = "#FFFFFF"
+plotly_theme = "plotly_white"
+
+st.markdown(f"""
 <style>
-    /* Google Fonts Import */
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
-    /* Color Tokens (Bright & Vibrant Light Palette) */
-    :root {
-        --bg-base: #F8FAFC;
-        --bg-card: #FFFFFF;
-        --border-card: #E2E8F0;
-        --accent-indigo: #4F46E5;
-        --accent-violet: #7C3AED;
-        --accent-sky: #0284C7;
-        --accent-emerald: #059669;
-        --accent-amber: #D97706;
-        --accent-rose: #E11D48;
-        --text-primary: #0F172A;
-        --text-secondary: #475569;
-        --text-muted: #64748B;
-    }
-
-    html, body, [class*="css"] {
+    .stApp {{
+        background-color: {bg_main};
+        color: {text_main};
         font-family: 'Plus Jakarta Sans', sans-serif;
-        color: var(--text-primary);
-    }
-    
-    code, pre {
-        font-family: 'JetBrains Mono', monospace !important;
-    }
+    }}
 
-    .block-container {
-        padding-top: 1.8rem;
-        padding-bottom: 3rem;
-        max-width: 1400px;
-    }
+    .block-container {{
+        padding-top: 1.5rem;
+        padding-bottom: 2.5rem;
+        max-width: 1280px;
+    }}
 
-    /* Vibrant Hero Banner */
-    .hero-banner {
-        background: linear-gradient(135deg, #EEF2FF 0%, #F5F3FF 45%, #F0FDF4 100%);
-        border: 1px solid #C7D2FE;
-        border-radius: 20px;
-        padding: 32px 36px;
-        margin-bottom: 24px;
-        position: relative;
-        overflow: hidden;
-        box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.08), 0 8px 10px -6px rgba(79, 70, 229, 0.04);
-    }
+    /* Card Box Minimalis */
+    .clean-card {{
+        background: {bg_card};
+        border: 1px solid {border_color};
+        border-radius: 12px;
+        padding: 20px 22px;
+        margin-bottom: 16px;
+        transition: all 0.2s ease;
+    }}
+    .clean-card:hover {{
+        border-color: {accent_primary};
+    }}
 
-    .hero-title {
-        font-size: 2.3rem;
-        font-weight: 800;
-        letter-spacing: -0.03em;
-        background: linear-gradient(135deg, #1E1B4B 0%, #4338CA 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+    /* Header & Typography */
+    .app-header {{
+        margin-bottom: 22px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid {border_color};
+    }}
+    .app-title {{
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: {text_main};
         margin: 0 0 6px 0;
-    }
-
-    .hero-subtitle {
-        font-size: 1.02rem;
-        color: #475569;
-        max-width: 800px;
-        line-height: 1.6;
+        letter-spacing: -0.02em;
+    }}
+    .app-subtitle {{
+        font-size: 0.95rem;
+        color: {text_muted};
         margin: 0;
-    }
+        line-height: 1.5;
+    }}
 
-    .hero-badge {
+    /* Stat & KPI Cards */
+    .stat-box {{
+        background: {bg_card};
+        border: 1px solid {border_color};
+        border-radius: 10px;
+        padding: 14px 16px;
+        text-align: center;
+    }}
+    .stat-label {{
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: {text_muted};
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 4px;
+    }}
+    .stat-value {{
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: {text_main};
+        margin: 0;
+    }}
+    .stat-desc {{
+        font-size: 0.78rem;
+        color: {text_muted};
+        margin-top: 2px;
+    }}
+
+    /* Badge Risk Simple */
+    .risk-pill {{
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        background: #DCFCE7;
-        border: 1px solid #86EFAC;
-        color: #15803D;
-        font-size: 0.8rem;
-        font-weight: 700;
-        padding: 4px 12px;
-        border-radius: 9999px;
-        margin-bottom: 12px;
-    }
-
-    /* Clean Bright Cards */
-    .bright-card {
-        background: #FFFFFF;
-        border: 1px solid #E2E8F0;
-        border-radius: 16px;
-        padding: 22px 24px;
-        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
-        margin-bottom: 18px;
-        transition: box-shadow 0.2s ease, border-color 0.2s ease;
-    }
-    .bright-card:hover {
-        border-color: #C7D2FE;
-        box-shadow: 0 8px 24px rgba(79, 70, 229, 0.08);
-    }
-
-    .card-title {
-        font-size: 1.1rem;
-        font-weight: 700;
-        letter-spacing: -0.01em;
-        margin-bottom: 14px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    /* KPI Summary Stat Cards */
-    .kpi-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-        gap: 14px;
-        margin-bottom: 20px;
-    }
-
-    .kpi-card {
-        background: #FFFFFF;
-        border: 1px solid #E2E8F0;
-        border-radius: 14px;
-        padding: 16px 18px;
-        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
-    }
-
-    .kpi-label {
-        font-size: 0.78rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: #64748B;
-        margin-bottom: 4px;
-    }
-
-    .kpi-value {
-        font-size: 1.75rem;
-        font-weight: 800;
-        color: #0F172A;
-        margin: 0;
-        letter-spacing: -0.02em;
-    }
-
-    .kpi-delta {
-        font-size: 0.8rem;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 0.9rem;
         font-weight: 600;
-        margin-top: 4px;
-    }
+    }}
+    .risk-high {{
+        background-color: #FEE2E2;
+        color: #991B1B;
+        border: 1px solid #F87171;
+    }}
+    .risk-med {{
+        background-color: #FEF3C7;
+        color: #92400E;
+        border: 1px solid #FBBF24;
+    }}
+    .risk-low {{
+        background-color: #DCFCE7;
+        color: #166534;
+        border: 1px solid #4ADE80;
+    }}
 
-    /* Risk Badges (Vibrant Colors) */
-    .badge-risk {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 18px;
-        border-radius: 30px;
+    /* Action Item */
+    .action-item {{
+        background: {bg_card};
+        border: 1px solid {border_color};
+        border-left: 3px solid {accent_primary};
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 8px;
+    }}
+    .action-title {{
+        font-size: 0.85rem;
         font-weight: 700;
-        font-size: 1rem;
-        letter-spacing: 0.01em;
-    }
-
-    .badge-risk-high {
-        background: #FEE2E2;
-        border: 1px solid #FCA5A5;
-        color: #B91C1C;
-    }
-
-    .badge-risk-medium {
-        background: #FEF3C7;
-        border: 1px solid #FCD34D;
-        color: #B45309;
-    }
-
-    .badge-risk-low {
-        background: #DCFCE7;
-        border: 1px solid #86EFAC;
-        color: #15803D;
-    }
-
-    /* Retention Action Playbook Box */
-    .playbook-card {
-        background: #FFFFFF;
-        border: 1px solid #E2E8F0;
-        border-left: 4px solid var(--accent-indigo);
-        border-radius: 12px;
-        padding: 16px 20px;
-        margin-bottom: 10px;
-        display: flex;
-        gap: 14px;
-        align-items: flex-start;
-        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
-    }
-
-    .playbook-tag {
-        background: #EEF2FF;
-        color: #4338CA;
-        border: 1px solid #C7D2FE;
-        font-size: 0.72rem;
-        font-weight: 700;
-        padding: 3px 8px;
-        border-radius: 6px;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        white-space: nowrap;
-    }
-
-    .playbook-text {
-        color: #334155;
-        font-size: 0.92rem;
-        line-height: 1.5;
+        color: {accent_primary};
+        margin-bottom: 4px;
+    }}
+    .action-desc {{
+        font-size: 0.88rem;
+        color: {text_main};
         margin: 0;
-    }
+        line-height: 1.45;
+    }}
 
     /* Tabs Styling */
-    .stTabs [data-baseweb="tab-list"] {
+    .stTabs [data-baseweb="tab-list"] {{
         gap: 8px;
-        background-color: #F1F5F9;
-        padding: 6px;
-        border-radius: 14px;
-        border: 1px solid #E2E8F0;
-    }
-
-    .stTabs [data-baseweb="tab"] {
-        height: 42px;
-        background-color: transparent;
+        background-color: {tab_bg};
+        padding: 4px;
         border-radius: 10px;
-        color: #64748B;
-        font-size: 0.95rem;
-        font-weight: 600;
-        padding: 0 20px;
-    }
+        border: 1px solid {border_color};
+    }}
+    .stTabs [data-baseweb="tab"] {{
+        height: 38px;
+        background-color: transparent;
+        border-radius: 8px;
+        color: {text_muted};
+        font-size: 0.9rem;
+        font-weight: 500;
+        padding: 0 16px;
+    }}
+    .stTabs [aria-selected="true"] {{
+        background-color: {tab_active_bg} !important;
+        color: {text_main} !important;
+        font-weight: 600 !important;
+        border: 1px solid {border_color} !important;
+    }}
 
-    .stTabs [aria-selected="true"] {
-        background-color: #FFFFFF !important;
-        color: #4F46E5 !important;
-        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
-        border: 1px solid #E2E8F0 !important;
-    }
-
-    /* Primary Buttons */
-    .stButton > button {
-        background: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%);
+    /* Button Primary */
+    .stButton > button {{
+        background-color: {accent_primary};
         color: #FFFFFF;
         border: none;
-        border-radius: 10px;
-        padding: 10px 24px;
-        font-weight: 700;
-        letter-spacing: 0.01em;
-        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
-        transition: all 0.2s ease;
-    }
-    .stButton > button:hover {
-        background: linear-gradient(135deg, #4338CA 0%, #4F46E5 100%);
-        box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35);
-        transform: translateY(-1px);
-    }
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.92rem;
+        padding: 8px 18px;
+        transition: background-color 0.15s ease;
+    }}
+    .stButton > button:hover {{
+        background-color: {accent_primary_hover};
+        color: #FFFFFF;
+    }}
+
+    /* Custom Form & Labels */
+    label {{
+        color: {text_main} !important;
+        font-weight: 500 !important;
+        font-size: 0.88rem !important;
+    }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -294,83 +225,89 @@ def load_model_metrics():
 pipeline = load_model_pipeline()
 metrics = load_model_metrics()
 
+# Ambil nama algoritma yang digunakan
+model_algo_name = "Gradient Boosting Classifier"
+if pipeline is not None and hasattr(pipeline, 'steps'):
+    model_algo_name = type(pipeline.steps[-1][1]).__name__.replace("Classifier", "")
+
 # ==============================================================================
-# 4. SIDEBAR BRANDING & SPECS
+# 4. SIDEBAR - INFORMASI SISTEM & STATUS MODEL
 # ==============================================================================
 with st.sidebar:
     st.markdown("""
-    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-        <div style="background: linear-gradient(135deg, #4F46E5, #7C3AED); width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: white; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);">
-            🎧
+    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+        <div style="background: #EEF2FF; width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+            🎵
         </div>
         <div>
-            <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #0F172A;">StreamPulse AI</h3>
-            <p style="margin: 0; font-size: 0.78rem; color: #64748B;">Retention Intelligence Engine</p>
+            <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #0F172A;">Churn Predictor</h3>
+            <p style="margin: 0; font-size: 0.75rem; color: #64748B;">Retention Intelligence</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
     
-    st.markdown("---")
+    # Widget Status Model Khusus
+    status_color = "#059669" if pipeline is not None else "#DC2626"
+    status_bg = "#DCFCE7" if pipeline is not None else "#FEE2E2"
+    status_text = "● ONLINE" if pipeline is not None else "● OFFLINE"
     
-    # Engine Status Widget
-    st.markdown("""
-    <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 14px; margin-bottom: 20px;">
+    st.markdown(f"""
+    <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 12px 14px; margin: 12px 0 16px 0;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 4px;">
             <span style="font-size: 0.75rem; color: #64748B; text-transform: uppercase; font-weight:700;">Status Model</span>
-            <span style="font-size: 0.75rem; color: #059669; font-weight:700; background: #DCFCE7; padding: 2px 8px; border-radius: 12px;">● ONLINE</span>
+            <span style="font-size: 0.75rem; color: {status_color}; font-weight:700; background: {status_bg}; padding: 2px 8px; border-radius: 12px;">{status_text}</span>
         </div>
-        <div style="font-size: 0.9rem; font-weight: 700; color: #0F172A;">Random Forest (Pipeline)</div>
+        <div style="font-size: 0.92rem; font-weight: 700; color: #0F172A;">{model_algo_name}</div>
         <div style="font-size: 0.78rem; color: #64748B; margin-top: 2px;">Artefak: <code>churn_model.pkl</code></div>
     </div>
     """, unsafe_allow_html=True)
-    
-    st.markdown("### 🎯 Metrik Validasi Model")
+
+    st.markdown("### 🎯 Metrik Validasi")
     st.markdown(f"""
     - **ROC-AUC Score:** `{metrics['roc_auc']:.4f}`
     - **F1-Score:** `{metrics['f1']:.4f}`
     - **Recall (Churn):** `{metrics['recall']:.4f}`
-    - **Akurasi Global:** `{metrics['accuracy']:.4f}`
+    - **Akurasi:** `{metrics['accuracy']:.4f}`
     """)
-    
+
     st.markdown("---")
-    st.markdown("### 👤 Pengembang")
+    st.markdown("### 👤 Informasi Proyek")
     st.markdown("""
-    - **Nama Peserta:** Soni
-    - **Program:** GDG Final Project Machine Learning
-    - **Tahun Proyek:** 2026
+    - **Peserta:** Soni
+    - **Program:** GDG Machine Learning
+    - **Tahun:** 2026
     """)
 
 # ==============================================================================
-# 5. HERO HEADER BANNER
+# 5. HEADER UTAMA (SIMPEL & BERSIH)
 # ==============================================================================
 st.markdown("""
-<div class="hero-banner">
-    <div class="hero-badge">🟢 Model Siap Produksi v1.0 Aktif</div>
-    <h1 class="hero-title">Streaming Subscription Churn Predictor</h1>
-    <p class="hero-subtitle">
-        Platform cerdas Machine Learning untuk memprediksi probabilitas berhenti berlangganan, mengidentifikasi anomali perilaku mendengar, dan mengeksekusi strategi retensi pelanggan secara presisi.
+<div class="app-header">
+    <div style="display: inline-block; background: #DCFCE7; color: #15803D; font-size: 0.78rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; border: 1px solid #86EFAC; margin-bottom: 8px;">
+        ● Model Siap Digunakan v1.0
+    </div>
+    <h1 class="app-title">Streaming Subscription Churn Predictor</h1>
+    <p class="app-subtitle">
+        Analisis probabilitas pelanggan musik berhenti berlangganan berdasarkan profil penggunaan, interaksi, dan riwayat akun.
     </p>
 </div>
 """, unsafe_allow_html=True)
 
-# Navigation Tabs
+# Navigasi Tab
 tab_single, tab_batch, tab_insights = st.tabs([
-    "🔮 Single Customer Studio",
-    "📁 Batch CSV Intelligence",
-    "📊 Model Analytics & Explainability"
+    "Prediksi Tunggal",
+    "Analisis Batch (CSV)",
+    "Kinerja & Wawasan Model"
 ])
 
 # ==============================================================================
-# 6. TAB 1: SINGLE CUSTOMER RETENTION STUDIO
+# 6. TAB 1: PREDIKSI TUNGGAL (SINGLE CUSTOMER)
 # ==============================================================================
 with tab_single:
-    st.markdown("### 👤 Prediksi & Rencana Retensi Pelanggan Tunggal")
-    st.markdown("Sesuaikan parameter profil dan aktivitas di bawah ini untuk melihat estimasi probabilitas churn secara *real-time*.")
-
-    # Preset Quick Load Buttons
-    preset_col1, preset_col2, preset_col3 = st.columns(3)
-    with preset_col1:
-        if st.button("🔴 Muat Contoh Profil Risiko Tinggi (High Churn)", use_container_width=True):
+    # Baris Preset Contoh Profil
+    preset_cols = st.columns([1, 1, 1])
+    with preset_cols[0]:
+        if st.button("🔴 Muat Contoh Profil Risiko Tinggi", use_container_width=True):
             st.session_state['age'] = 58
             st.session_state['location'] = 'New York'
             st.session_state['sub_type'] = 'Free'
@@ -391,8 +328,8 @@ with tab_single:
             st.session_state['cs_inquiries'] = 'High'
             st.rerun()
 
-    with preset_col2:
-        if st.button("🟢 Muat Contoh Profil Pelanggan Setia (Low Risk)", use_container_width=True):
+    with preset_cols[1]:
+        if st.button("🟢 Muat Contoh Profil Pelanggan Setia", use_container_width=True):
             st.session_state['age'] = 28
             st.session_state['location'] = 'California'
             st.session_state['sub_type'] = 'Premium'
@@ -413,31 +350,28 @@ with tab_single:
             st.session_state['cs_inquiries'] = 'Low'
             st.rerun()
 
-    with preset_col3:
-        if st.button("🔄 Reset ke Nilai Default", use_container_width=True):
+    with preset_cols[2]:
+        if st.button("🔄 Reset ke Nilai Awal", use_container_width=True):
             for k in ['age', 'location', 'sub_type', 'payment_plan', 'payment_method', 'tenure', 'weekly_hours', 'avg_session', 'skip_rate', 'weekly_songs', 'unique_songs', 'fav_artists', 'friends', 'playlists', 'shared', 'pauses', 'notif_clicks', 'cs_inquiries']:
                 if k in st.session_state:
                     del st.session_state[k]
             st.rerun()
 
-    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
-    with st.form("single_prediction_studio"):
-        col_prof, col_stream, col_social = st.columns(3)
+    with st.form("single_prediction_form"):
+        col1, col2, col3 = st.columns(3)
 
-        with col_prof:
-            st.markdown("""
-            <div class="card-title" style="color: #4F46E5;">
-                <span>👤</span> Profil & Paket Langganan
-            </div>
-            """, unsafe_allow_html=True)
-            age = st.slider("Usia Pelanggan", 18, 80, st.session_state.get('age', 34))
+        with col1:
+            st.markdown("#### Profil & Langganan")
+            age = st.slider("Usia", 18, 80, st.session_state.get('age', 34))
+            
             location_options = ['California', 'New York', 'Washington', 'Florida', 'Texas', 'Montana',
                                 'New Jersey', 'Georgia', 'Wisconsin', 'Idaho', 'Alabama', 'South Carolina',
                                 'North Carolina', 'Utah', 'West Virginia', 'Maine', 'Nebraska', 'Virginia',
                                 'Vermont', 'North Dakota']
             default_loc_idx = location_options.index(st.session_state.get('location', 'California')) if st.session_state.get('location', 'California') in location_options else 0
-            location = st.selectbox("Wilayah Geografis", location_options, index=default_loc_idx)
+            location = st.selectbox("Lokasi", location_options, index=default_loc_idx)
             
             sub_options = ['Free', 'Premium', 'Family', 'Student']
             default_sub_idx = sub_options.index(st.session_state.get('sub_type', 'Premium')) if st.session_state.get('sub_type', 'Premium') in sub_options else 1
@@ -451,42 +385,34 @@ with tab_single:
             default_method_idx = method_options.index(st.session_state.get('payment_method', 'Credit Card')) if st.session_state.get('payment_method', 'Credit Card') in method_options else 0
             payment_method = st.selectbox("Metode Pembayaran", method_options, index=default_method_idx)
             
-            tenure_input = st.number_input("Masa Aktif Akun (Hari Sejak Bergabung)", 1, 3000, st.session_state.get('tenure', 365), help="Jumlah hari sejak pelanggan mendaftar akun")
+            tenure_input = st.number_input("Lama Bergabung (Hari)", 1, 3000, st.session_state.get('tenure', 365))
 
-        with col_stream:
-            st.markdown("""
-            <div class="card-title" style="color: #7C3AED;">
-                <span>🎧</span> Perilaku Mendengarkan Musik
-            </div>
-            """, unsafe_allow_html=True)
-            weekly_hours = st.slider("Jam Dengar Mingguan (Jam)", 0.0, 50.0, float(st.session_state.get('weekly_hours', 22.0)), 0.5)
+        with col2:
+            st.markdown("#### Aktivitas Mendengarkan")
+            weekly_hours = st.slider("Jam Dengar Mingguan", 0.0, 50.0, float(st.session_state.get('weekly_hours', 22.0)), 0.5)
             avg_session = st.slider("Rata-rata Durasi Sesi (Menit)", 1.0, 120.0, float(st.session_state.get('avg_session', 50.0)), 1.0)
-            skip_rate = st.slider("Rasio Melewati Lagu (Song Skip Rate)", 0.0, 1.0, float(st.session_state.get('skip_rate', 0.35)), 0.01, help="Proporsi lagu yang dilewati sebelum selesai diputar")
-            weekly_songs = st.number_input("Total Lagu Diputar Mingguan", 1, 500, int(st.session_state.get('weekly_songs', 240)))
+            skip_rate = st.slider("Rasio Skip Lagu", 0.0, 1.0, float(st.session_state.get('skip_rate', 0.35)), 0.01)
+            weekly_songs = st.number_input("Total Lagu Mingguan", 1, 500, int(st.session_state.get('weekly_songs', 240)))
             unique_songs = st.number_input("Total Lagu Unik Mingguan", 1, 300, int(st.session_state.get('unique_songs', 145)))
 
-        with col_social:
-            st.markdown("""
-            <div class="card-title" style="color: #059669;">
-                <span>💬</span> Keterlibatan Sosial & Dukungan
-            </div>
-            """, unsafe_allow_html=True)
+        with col3:
+            st.markdown("#### Keterlibatan & Dukungan")
             fav_artists = st.slider("Jumlah Artis Favorit", 0, 50, int(st.session_state.get('fav_artists', 18)))
-            friends = st.slider("Jumlah Teman di Platform", 0, 200, int(st.session_state.get('friends', 65)))
-            playlists = st.slider("Playlist yang Dibuat", 0, 100, int(st.session_state.get('playlists', 20)))
-            shared = st.slider("Playlist yang Dibagikan", 0, 50, int(st.session_state.get('shared', 8)))
-            pauses = st.slider("Frekuensi Jeda Langganan (Subscription Pauses)", 0, 5, int(st.session_state.get('pauses', 1)))
-            notif_clicks = st.slider("Notifikasi Promosi yang Diklik", 0, 50, int(st.session_state.get('notif_clicks', 18)))
+            friends = st.slider("Jumlah Teman di Aplikasi", 0, 200, int(st.session_state.get('friends', 65)))
+            playlists = st.slider("Playlist Dibuat", 0, 100, int(st.session_state.get('playlists', 20)))
+            shared = st.slider("Playlist Dibagikan", 0, 50, int(st.session_state.get('shared', 8)))
+            pauses = st.slider("Frekuensi Jeda Akun", 0, 5, int(st.session_state.get('pauses', 1)))
+            notif_clicks = st.slider("Klik Notifikasi", 0, 50, int(st.session_state.get('notif_clicks', 18)))
             
             cs_options = ['Low', 'Medium', 'High']
             default_cs_idx = cs_options.index(st.session_state.get('cs_inquiries', 'Medium')) if st.session_state.get('cs_inquiries', 'Medium') in cs_options else 1
-            cs_inquiries = st.selectbox("Frekuensi Inquiry Customer Service", cs_options, index=default_cs_idx)
+            cs_inquiries = st.selectbox("Frekuensi CS Inquiry", cs_options, index=default_cs_idx)
 
-        submitted = st.form_submit_button("⚡ Analisis & Prediksi Risiko Pelanggan", use_container_width=True)
+        submitted = st.form_submit_button("Hitung Prediksi Churn", use_container_width=True)
 
     if submitted:
         if pipeline is None:
-            st.error("⚠️ Model belum dimuat. Pastikan file `models/churn_model.pkl` tersedia.")
+            st.error("Model tidak ditemukan di folder `models/churn_model.pkl`.")
         else:
             input_dict = {
                 'customer_id': 999999,
@@ -511,115 +437,113 @@ with tab_single:
             }
             input_df = pd.DataFrame([input_dict])
 
-            with st.spinner("Mengevaluasi pipeline & inferensi probabilitas..."):
+            with st.spinner("Memproses prediksi..."):
                 prob = pipeline.predict_proba(input_df)[:, 1][0]
                 risk_tier, risk_icon, risk_label_id = get_risk_tier(prob)
 
-            st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
-            st.markdown("### 📊 Hasil Prediksi & Penilaian Risiko")
+            st.markdown("---")
+            st.markdown("### Hasil Prediksi")
 
-            res_col1, res_col2, res_col3 = st.columns([1.2, 1.2, 1.6])
+            r_col1, r_col2, r_col3 = st.columns([1.2, 1.2, 1.6])
 
-            with res_col1:
-                st.markdown("""
-                <div class="bright-card" style="text-align: center; height: 180px; display: flex; flex-direction: column; justify-content: center;">
-                    <span class="kpi-label">Probabilitas Churn</span>
-                    <h1 style="font-size: 2.8rem; font-weight: 800; margin: 4px 0; color: #0F172A;">{:.1f}%</h1>
-                    <span style="font-size: 0.8rem; color: #64748B;">Confidence Score Model ML</span>
-                </div>
-                """.format(prob * 100), unsafe_allow_html=True)
-
-            with res_col2:
-                badge_class = "badge-risk-high" if risk_tier == "High" else ("badge-risk-medium" if risk_tier == "Medium" else "badge-risk-low")
+            with r_col1:
                 st.markdown(f"""
-                <div class="bright-card" style="text-align: center; height: 180px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                    <span class="kpi-label">Klasifikasi Risiko</span>
-                    <div style="margin: 10px 0;">
-                        <span class="badge-risk {badge_class}">{risk_icon} {risk_tier} Risk ({risk_label_id})</span>
-                    </div>
-                    <span style="font-size: 0.8rem; color: #64748B;">Prioritas Penanganan Retensi</span>
+                <div class="stat-box" style="height: 160px; display: flex; flex-direction: column; justify-content: center;">
+                    <div class="stat-label">Probabilitas Churn</div>
+                    <div class="stat-value">{prob * 100:.1f}%</div>
+                    <div class="stat-desc">Estimasi Risiko Model</div>
                 </div>
                 """, unsafe_allow_html=True)
 
-            with res_col3:
+            with r_col2:
+                risk_class = "risk-high" if risk_tier == "High" else ("risk-med" if risk_tier == "Medium" else "risk-low")
+                st.markdown(f"""
+                <div class="stat-box" style="height: 160px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    <div class="stat-label">Kategori Risiko</div>
+                    <div style="margin: 8px 0;">
+                        <span class="risk-pill {risk_class}">{risk_icon} Risiko {risk_label_id} ({risk_tier})</span>
+                    </div>
+                    <div class="stat-desc">Tingkat Prioritas Retensi</div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            with r_col3:
+                gauge_color = "#EF4444" if prob >= 0.7 else ("#F59E0B" if prob >= 0.3 else "#10B981")
                 fig_gauge = go.Figure(go.Indicator(
                     mode="gauge+number",
                     value=prob * 100,
-                    number={'suffix': "%", 'font': {'size': 26, 'color': '#0F172A', 'family': 'Plus Jakarta Sans'}},
+                    number={'suffix': "%", 'font': {'size': 24, 'color': text_main}},
                     domain={'x': [0, 1], 'y': [0, 1]},
                     gauge={
-                        'axis': {'range': [0, 100], 'tickwidth': 1, 'tickcolor': "#94A3B8"},
-                        'bar': {'color': "#E11D48" if prob >= 0.7 else ("#D97706" if prob >= 0.3 else "#059669"), 'thickness': 0.28},
-                        'bgcolor': "#F1F5F9",
+                        'axis': {'range': [0, 100], 'tickcolor': text_muted},
+                        'bar': {'color': gauge_color, 'thickness': 0.28},
+                        'bgcolor': "rgba(0,0,0,0)",
                         'steps': [
-                            {'range': [0, 30], 'color': "#DCFCE7"},
-                            {'range': [30, 70], 'color': "#FEF3C7"},
-                            {'range': [70, 100], 'color': "#FEE2E2"}
+                            {'range': [0, 30], 'color': "rgba(16, 185, 129, 0.2)"},
+                            {'range': [30, 70], 'color': "rgba(245, 158, 11, 0.2)"},
+                            {'range': [70, 100], 'color': "rgba(239, 68, 68, 0.2)"}
                         ],
                         'threshold': {
-                            'line': {'color': "#0F172A", 'width': 3},
+                            'line': {'color': text_main, 'width': 3},
                             'thickness': 0.8,
                             'value': prob * 100
                         }
                     }
                 ))
                 fig_gauge.update_layout(
-                    height=180,
+                    height=160,
                     margin=dict(l=20, r=20, t=25, b=10),
                     paper_bgcolor="rgba(0,0,0,0)",
-                    font={'family': 'Plus Jakarta Sans'}
+                    font={'family': 'Plus Jakarta Sans', 'color': text_main}
                 )
                 st.plotly_chart(fig_gauge, use_container_width=True)
 
-            # Tailored Business Action Plan
-            st.markdown("### 🎯 Rekomendasi Strategi Retensi Khusus (Actionable Playbook)")
-
-            playbooks = []
+            # Rekomendasi Aksi Bisnis
+            st.markdown("#### Rekomendasi Tindakan")
+            actions = []
             if risk_tier == "High":
-                playbooks.append(("PRIORITAS RETENSI TINGGI", "Tawarkan promo diskon perpanjangan loyalitas 30% atau upgrade ke paket Tahunan dengan bonus 2 bulan gratis."))
+                actions.append(("Prioritas Retensi", "Berikan penawaran diskon khusus perpanjangan atau promo langganan tahunan dengan potongan harga."))
                 if cs_inquiries == "High":
-                    playbooks.append(("CS ESCALATION", "Tugaskan Senior Customer Care Specialist untuk menghubungi pelanggan secara proaktif dan menyelesaikan keluhan akun."))
+                    actions.append(("Follow-up Dukungan CS", "Eskalasi kendala ke tim penanganan pelanggan untuk menyelesaikan masalah layanan."))
                 if skip_rate > 0.5:
-                    playbooks.append(("CONTENT RE-ALIGNMENT", "Rasio skip tinggi mengindikasikan ketidaksesuaian konten. Rekomendasikan kurasi playlist harian baru berbasis artis favorit."))
+                    actions.append(("Pembaruan Rekomendasi Musik", "Rasio skip lagu tinggi; tawarkan playlist rekomendasi baru sesuai preferensi artis favorit."))
                 if pauses >= 2:
-                    playbooks.append(("PAUSE PREVENTION", "Berikan fleksibilitas freeze akun sementara tanpa biaya selama 30 hari untuk mencegah pembatalan permanen."))
+                    actions.append(("Opsi Pause Fleksibel", "Berikan fasilitas jeda akun sementara gratis agar tidak berhenti berlangganan permanen."))
             elif risk_tier == "Medium":
-                playbooks.append(("PERSONALIZED ENGAGEMENT", "Kirimkan push notification terpersonalisasi mengenai konser online atau rilis album eksklusif artis favorit."))
+                actions.append(("Peningkatan Keterlibatan", "Kirim notifikasi update album atau playlist mingguan yang relevan."))
                 if friends < 10:
-                    playbooks.append(("SOCIAL ONBOARDING", "Ajak pelanggan menggunakan fitur 'Friend Activity' dan bagikan playlist ke media sosial untuk meningkatkan keterikatan."))
+                    actions.append(("Fitur Sosial", "Ajak pelanggan menghubungkan teman atau membagikan playlist."))
                 if payment_plan == "Monthly":
-                    playbooks.append(("PLAN UPSELL", "Tawarkan promosi hemat beralih ke paket Tahunan dengan keuntungan reward eksklusif."))
+                    actions.append(("Penawaran Paket Tahunan", "Tawarkan keuntungan upgrade ke paket tahunan."))
             else:
-                playbooks.append(("LOYALTY PRESERVATION", "Pelanggan berada dalam kondisi sangat sehat. Pertahankan kualitas streaming tinggi dan berikan undangan uji coba fitur beta."))
+                actions.append(("Pertahankan Loyalitas", "Pelanggan berada dalam kategori sehat. Pertahankan kualitas layanan dan kirim rekomendasi konten berkala."))
 
-            for tag, text in playbooks:
+            for title, desc in actions:
                 st.markdown(f"""
-                <div class="playbook-card">
-                    <span class="playbook-tag">{tag}</span>
-                    <p class="playbook-text">{text}</p>
+                <div class="action-item">
+                    <div class="action-title">• {title}</div>
+                    <p class="action-desc">{desc}</p>
                 </div>
                 """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 7. TAB 2: BATCH CSV INTELLIGENCE
+# 7. TAB 2: ANALISIS BATCH (CSV)
 # ==============================================================================
 with tab_batch:
-    st.markdown("### 📁 Batch Prediction Intelligence (CSV File)")
-    st.markdown("Proses data pelanggan dalam skala besar secara otomatis untuk audit churn massal dan perencanaan kampanye retensi bulanan.")
+    st.markdown("### Analisis File CSV Pelanggan")
+    st.markdown("Unggah berkas CSV untuk memprediksi risiko churn banyak pelanggan sekaligus.")
 
-    upload_col1, upload_col2, upload_col3 = st.columns([2.5, 1.2, 1.2])
-    with upload_col1:
-        uploaded_file = st.file_uploader("Unggah Berkas CSV Pelanggan", type=["csv"])
-    with upload_col2:
-        st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
-        load_demo = st.button("⚡ Muat Langsung 200 Baris Demo", use_container_width=True)
-    with upload_col3:
-        st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
+    u_col1, u_col2, u_col3 = st.columns([2.5, 1.2, 1.2])
+    with u_col1:
+        uploaded_file = st.file_uploader("Pilih file CSV", type=["csv"], label_visibility="collapsed")
+    with u_col2:
+        load_demo = st.button("Muat 200 Baris Demo", use_container_width=True)
+    with u_col3:
         if os.path.exists('data/sample_test_200_customers.csv'):
             with open('data/sample_test_200_customers.csv', 'rb') as f_sample:
                 sample_data = f_sample.read()
             st.download_button(
-                label="📥 Unduh File Sampel (200 CSV)",
+                label="Unduh File Sampel",
                 data=sample_data,
                 file_name="sample_test_200_customers.csv",
                 mime="text/csv",
@@ -631,18 +555,17 @@ with tab_batch:
         df_batch = pd.read_csv(uploaded_file)
     elif load_demo and os.path.exists('data/sample_test_200_customers.csv'):
         df_batch = pd.read_csv('data/sample_test_200_customers.csv')
-        st.info("Memuat 200 baris sampel dari `data/sample_test_200_customers.csv`.")
-
+        st.info("Berhasil memuat 200 baris data dari berkas sampel.")
 
     if df_batch is not None:
         st.markdown(f"**Pratinjau Data ({len(df_batch):,} Baris):**")
         st.dataframe(df_batch.head(5), use_container_width=True)
 
-        if st.button("🚀 Jalankan Analisis Prediksi Batch", use_container_width=True):
+        if st.button("Jalankan Prediksi Batch", use_container_width=True):
             if pipeline is None:
                 st.error("Model pipeline belum dimuat!")
             else:
-                with st.spinner("Menghitung probabilitas churn untuk seluruh baris..."):
+                with st.spinner("Menghitung prediksi..."):
                     probs = pipeline.predict_proba(df_batch)[:, 1]
                     res_df = df_batch.copy()
                     res_df['churn_probability'] = np.round(probs, 4)
@@ -653,54 +576,66 @@ with tab_batch:
 
     if 'batch_results' in st.session_state:
         res_df = st.session_state['batch_results']
-        st.success("✅ Pemrosesan Batch Selesai dengan Sukses!")
+        st.success("Analisis selesai.")
 
-        # Batch KPI Summary
         total_cnt = len(res_df)
         high_cnt = (res_df['risk_tier'] == 'High').sum()
         med_cnt = (res_df['risk_tier'] == 'Medium').sum()
         low_cnt = (res_df['risk_tier'] == 'Low').sum()
         avg_prob = res_df['churn_probability'].mean() * 100
 
-        st.markdown(f"""
-        <div class="kpi-container">
-            <div class="kpi-card">
-                <div class="kpi-label">Total Pelanggan</div>
-                <div class="kpi-value">{total_cnt:,}</div>
-            </div>
-            <div class="kpi-card" style="border-left: 4px solid #E11D48;">
-                <div class="kpi-label">High Risk</div>
-                <div class="kpi-value" style="color: #E11D48;">{high_cnt:,}</div>
-                <div class="kpi-delta" style="color: #E11D48;">{high_cnt/total_cnt*100:.1f}% Total</div>
-            </div>
-            <div class="kpi-card" style="border-left: 4px solid #D97706;">
-                <div class="kpi-label">Medium Risk</div>
-                <div class="kpi-value" style="color: #D97706;">{med_cnt:,}</div>
-                <div class="kpi-delta" style="color: #D97706;">{med_cnt/total_cnt*100:.1f}% Total</div>
-            </div>
-            <div class="kpi-card" style="border-left: 4px solid #059669;">
-                <div class="kpi-label">Low Risk</div>
-                <div class="kpi-value" style="color: #059669;">{low_cnt:,}</div>
-                <div class="kpi-delta" style="color: #059669;">{low_cnt/total_cnt*100:.1f}% Total</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-label">Rata-rata Churn</div>
-                <div class="kpi-value">{avg_prob:.1f}%</div>
-            </div>
+        kpi_cols = st.columns(5)
+        kpi_cols[0].markdown(f"""
+        <div class="stat-box">
+            <div class="stat-label">Total Data</div>
+            <div class="stat-value">{total_cnt:,}</div>
         </div>
         """, unsafe_allow_html=True)
 
-        # Batch Visualizations
+        kpi_cols[1].markdown(f"""
+        <div class="stat-box" style="border-top: 3px solid #EF4444;">
+            <div class="stat-label">Risiko Tinggi</div>
+            <div class="stat-value" style="color: #EF4444;">{high_cnt:,}</div>
+            <div class="stat-desc">{high_cnt/total_cnt*100:.1f}%</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        kpi_cols[2].markdown(f"""
+        <div class="stat-box" style="border-top: 3px solid #F59E0B;">
+            <div class="stat-label">Risiko Sedang</div>
+            <div class="stat-value" style="color: #F59E0B;">{med_cnt:,}</div>
+            <div class="stat-desc">{med_cnt/total_cnt*100:.1f}%</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        kpi_cols[3].markdown(f"""
+        <div class="stat-box" style="border-top: 3px solid #10B981;">
+            <div class="stat-label">Risiko Rendah</div>
+            <div class="stat-value" style="color: #10B981;">{low_cnt:,}</div>
+            <div class="stat-desc">{low_cnt/total_cnt*100:.1f}%</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        kpi_cols[4].markdown(f"""
+        <div class="stat-box">
+            <div class="stat-label">Rata-rata Churn</div>
+            <div class="stat-value">{avg_prob:.1f}%</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+
         v_col1, v_col2 = st.columns(2)
         with v_col1:
             fig_pie = px.pie(
                 res_df, names='risk_tier',
                 title="Proporsi Tingkat Risiko Churn",
                 color='risk_tier',
-                color_discrete_map={'High': '#E11D48', 'Medium': '#F59E0B', 'Low': '#10B981'},
-                hole=0.45
+                color_discrete_map={'High': '#EF4444', 'Medium': '#F59E0B', 'Low': '#10B981'},
+                hole=0.45,
+                template=plotly_theme
             )
-            fig_pie.update_layout(paper_bgcolor="rgba(0,0,0,0)", font={'family': 'Plus Jakarta Sans'})
+            fig_pie.update_layout(paper_bgcolor="rgba(0,0,0,0)", font={'family': 'Plus Jakarta Sans', 'color': text_main})
             st.plotly_chart(fig_pie, use_container_width=True)
 
         with v_col2:
@@ -709,14 +644,15 @@ with tab_batch:
                     res_df, x='subscription_type', color='risk_tier',
                     title="Distribusi Risiko Berdasarkan Tipe Langganan",
                     barmode='group',
-                    color_discrete_map={'High': '#E11D48', 'Medium': '#F59E0B', 'Low': '#10B981'}
+                    color_discrete_map={'High': '#EF4444', 'Medium': '#F59E0B', 'Low': '#10B981'},
+                    template=plotly_theme
                 )
-                fig_bar.update_layout(paper_bgcolor="rgba(0,0,0,0)", font={'family': 'Plus Jakarta Sans'})
+                fig_bar.update_layout(paper_bgcolor="rgba(0,0,0,0)", font={'family': 'Plus Jakarta Sans', 'color': text_main})
                 st.plotly_chart(fig_bar, use_container_width=True)
 
-        # Filter Feature for Table
-        st.markdown("### 📋 Hasil Prediksi Terinci")
-        filter_risk = st.selectbox("🔍 Filter Tabel Berdasarkan Kategori Risiko:", ["Semua Kategori", "Hanya High Risk 🔴", "Hanya Medium Risk 🟡", "Hanya Low Risk 🟢"])
+        # Filter dan Tabel
+        st.markdown("#### Tabel Hasil Prediksi")
+        filter_risk = st.selectbox("Filter berdasarkan kategori risiko:", ["Semua", "Hanya High Risk", "Hanya Medium Risk", "Hanya Low Risk"])
         
         filtered_df = res_df.copy()
         if "High" in filter_risk:
@@ -730,7 +666,7 @@ with tab_batch:
 
         csv_bytes = filtered_df.to_csv(index=False).encode('utf-8')
         st.download_button(
-            label="📥 Unduh Hasil Prediksi (CSV)",
+            label="Unduh Hasil Prediksi (CSV)",
             data=csv_bytes,
             file_name="churn_predictions_export.csv",
             mime="text/csv",
@@ -738,90 +674,109 @@ with tab_batch:
         )
 
 # ==============================================================================
-# 8. TAB 3: MODEL INSIGHTS & EXPLAINABILITY
+# 8. TAB 3: KINERJA & WAWASAN MODEL
 # ==============================================================================
 with tab_insights:
-    st.markdown("### 📊 Analitik Model & Penjelasan Fitur (Explainability)")
-    st.markdown("Ringkasan performa model Machine Learning yang dievaluasi pada data holdout validasi secara independen.")
+    st.markdown("### Evaluasi Model & Penjelasan Fitur")
+    st.markdown("Ringkasan performa model yang dievaluasi pada data pengujian independen.")
 
-    st.markdown(f"""
-    <div class="kpi-container">
-        <div class="kpi-card" style="border-top: 4px solid #4F46E5;">
-            <div class="kpi-label">ROC-AUC Score</div>
-            <div class="kpi-value" style="color: #4F46E5;">{metrics['roc_auc']:.4f}</div>
-            <div class="kpi-delta" style="color: #64748B;">Kemampuan Perankingan Risiko</div>
-        </div>
-        <div class="kpi-card" style="border-top: 4px solid #059669;">
-            <div class="kpi-label">F1-Score</div>
-            <div class="kpi-value" style="color: #059669;">{metrics['f1']:.4f}</div>
-            <div class="kpi-delta" style="color: #64748B;">Keseimbangan Precision-Recall</div>
-        </div>
-        <div class="kpi-card" style="border-top: 4px solid #E11D48;">
-            <div class="kpi-label">Recall (Churn)</div>
-            <div class="kpi-value" style="color: #E11D48;">{metrics['recall']:.4f}</div>
-            <div class="kpi-delta" style="color: #64748B;">Minimasi False Negative</div>
-        </div>
-        <div class="kpi-card" style="border-top: 4px solid #D97706;">
-            <div class="kpi-label">Akurasi Validasi</div>
-            <div class="kpi-value" style="color: #D97706;">{metrics['accuracy']:.4f}</div>
-            <div class="kpi-delta" style="color: #64748B;">Generalisasi Data Baru</div>
-        </div>
+    m_cols = st.columns(4)
+    m_cols[0].markdown(f"""
+    <div class="stat-box" style="border-top: 3px solid {accent_primary};">
+        <div class="stat-label">ROC-AUC Score</div>
+        <div class="stat-value" style="color: {accent_primary};">{metrics['roc_auc']:.4f}</div>
+        <div class="stat-desc">Perankingan Probabilitas</div>
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("---")
-    st.markdown("### 🏆 Top 15 Fitur Penentu Prediksi (Feature Importance)")
-    st.markdown("Kontribusi prediktif masing-masing fitur di dalam model ensemble Random Forest:")
+    m_cols[1].markdown(f"""
+    <div class="stat-box" style="border-top: 3px solid #10B981;">
+        <div class="stat-label">F1-Score</div>
+        <div class="stat-value" style="color: #10B981;">{metrics['f1']:.4f}</div>
+        <div class="stat-desc">Harmoni Precision & Recall</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-    if pipeline is not None and hasattr(pipeline.named_steps['classifier'], 'feature_importances_'):
+    m_cols[2].markdown(f"""
+    <div class="stat-box" style="border-top: 3px solid #EF4444;">
+        <div class="stat-label">Recall (Churn)</div>
+        <div class="stat-value" style="color: #EF4444;">{metrics['recall']:.4f}</div>
+        <div class="stat-desc">Deteksi Kasus Churn</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    m_cols[3].markdown(f"""
+    <div class="stat-box" style="border-top: 3px solid #F59E0B;">
+        <div class="stat-label">Akurasi</div>
+        <div class="stat-value" style="color: #F59E0B;">{metrics['accuracy']:.4f}</div>
+        <div class="stat-desc">Akurasi Keseluruhan</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
+    st.markdown("#### 15 Fitur Paling Berpengaruh (Feature Importance)")
+
+    if pipeline is not None and hasattr(pipeline, 'steps'):
         try:
-            preproc = pipeline.named_steps['preprocessor']
-            num_names = preproc.transformers_[0][2]
-            cat_encoder = preproc.transformers_[1][1].named_steps['encoder']
-            cat_names = cat_encoder.get_feature_names_out(preproc.transformers_[1][2]).tolist()
-            all_feature_names = num_names + cat_names
+            clf = pipeline.steps[-1][1]
+            if hasattr(clf, 'feature_importances_'):
+                importances = clf.feature_importances_
+                preproc = pipeline.named_steps.get('preprocessor', None)
+                feature_names = []
+                if preproc is not None:
+                    for name, trans, cols in preproc.transformers_:
+                        last = trans.steps[-1][1] if hasattr(trans, 'steps') else trans
+                        if hasattr(last, 'get_feature_names_out'):
+                            feature_names.extend(last.get_feature_names_out(cols))
+                        else:
+                            feature_names.extend(cols)
 
-            importances = pipeline.named_steps['classifier'].feature_importances_
-            fi_df = pd.DataFrame({
-                'Feature': all_feature_names[:len(importances)],
-                'Importance': importances
-            }).sort_values('Importance', ascending=True).tail(15)
+                if len(feature_names) != len(importances):
+                    feature_names = [f"Fitur {i+1}" for i in range(len(importances))]
 
-            fig_fi = px.bar(
-                fi_df, x='Importance', y='Feature', orientation='h',
-                title="Top 15 Feature Importances (Random Forest)",
-                color='Importance',
-                color_continuous_scale=['#C7D2FE', '#818CF8', '#4F46E5', '#312E81']
-            )
-            fig_fi.update_layout(paper_bgcolor="rgba(0,0,0,0)", font={'family': 'Plus Jakarta Sans'}, height=520)
-            st.plotly_chart(fig_fi, use_container_width=True)
-        except Exception:
-            st.info("Visualisasi fitur sedang disiapkan...")
+                fi_df = pd.DataFrame({
+                    'Fitur': feature_names[:len(importances)],
+                    'Importance': importances
+                }).sort_values('Importance', ascending=True).tail(15)
 
-    # Business Interpretation Matrix
-    st.markdown("### 💡 Interpretasi Bisnis: False Positive vs False Negative")
-    i_col1, i_col2 = st.columns(2)
+                fig_fi = px.bar(
+                    fi_df, x='Importance', y='Fitur', orientation='h',
+                    template=plotly_theme,
+                    color='Importance',
+                    color_continuous_scale=['#818CF8', '#4F46E5']
+                )
+                fig_fi.update_layout(
+                    paper_bgcolor="rgba(0,0,0,0)",
+                    plot_bgcolor="rgba(0,0,0,0)",
+                    font={'family': 'Plus Jakarta Sans', 'color': text_main},
+                    height=480,
+                    margin=dict(l=20, r=20, t=20, b=20)
+                )
+                st.plotly_chart(fig_fi, use_container_width=True)
+        except Exception as e:
+            st.info("Informasi kontribusi fitur sedang dimuat...")
 
-    with i_col1:
-        st.markdown("""
-        <div class="bright-card" style="border-left: 4px solid #E11D48;">
-            <h4 style="color: #B91C1C; margin:0 0 8px 0;">⚠️ Dampak False Negative (FN)</h4>
-            <p style="font-size: 0.9rem; color: #334155; margin:0;">
-                Model memprediksi pelanggan <b>aman (tidak churn)</b>, padahal sebenarnya mereka <b>berhenti berlangganan</b>. 
-                <br><br>
-                <b>Biaya Bisnis:</b> Kehilangan pendapatan berulang (<i>Customer Lifetime Value</i>) tanpa ada peluang untuk melakukan retensi. Model diprioritaskan untuk meminimalkan FN melalui skor <b>Recall 85.6%</b>.
+    st.markdown("#### Pertimbangan Bisnis: False Positive vs False Negative")
+    b_col1, b_col2 = st.columns(2)
+
+    with b_col1:
+        st.markdown(f"""
+        <div class="clean-card" style="border-left: 3px solid #EF4444;">
+            <div style="font-weight: 700; color: #EF4444; margin-bottom: 6px;">Dampak False Negative (FN)</div>
+            <p style="font-size: 0.88rem; color: {text_main}; margin: 0; line-height: 1.45;">
+                Pelanggan diprediksi <b>aman</b> tetapi sebenarnya <b>berhenti berlangganan</b>. 
+                Hal ini menyebabkan kehilangan pendapatan tanpa kesempatan melakukan upaya retensi. Model diprioritaskan menjaga <b>Recall {metrics['recall']*100:.1f}%</b> untuk menekan risiko ini.
             </p>
         </div>
         """, unsafe_allow_html=True)
 
-    with i_col2:
-        st.markdown("""
-        <div class="bright-card" style="border-left: 4px solid #D97706;">
-            <h4 style="color: #B45309; margin:0 0 8px 0;">ℹ️ Dampak False Positive (FP)</h4>
-            <p style="font-size: 0.9rem; color: #334155; margin:0;">
-                Model memprediksi pelanggan <b>berisiko churn</b>, padahal sebenarnya mereka <b>tetap setia berlangganan</b>.
-                <br><br>
-                <b>Biaya Bisnis:</b> Pengeluaran insentif/diskon promo yang sebenarnya tidak dibutuhkan. Keseimbangan ini dikontrol melalui metrik <b>Precision 84.7%</b>.
+    with b_col2:
+        st.markdown(f"""
+        <div class="clean-card" style="border-left: 3px solid #F59E0B;">
+            <div style="font-weight: 700; color: #F59E0B; margin-bottom: 6px;">Dampak False Positive (FP)</div>
+            <p style="font-size: 0.88rem; color: {text_main}; margin: 0; line-height: 1.45;">
+                Pelanggan diprediksi <b>akan churn</b> padahal sebenarnya <b>tetap setia</b>. 
+                Dampaknya adalah pengeluaran promo/insentif yang tidak perlu. Keseimbangan ini dijaga dengan metrik <b>Precision {metrics['precision']*100:.1f}%</b>.
             </p>
         </div>
         """, unsafe_allow_html=True)
