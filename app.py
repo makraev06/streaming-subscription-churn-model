@@ -225,6 +225,18 @@ def load_model_metrics():
 pipeline = load_model_pipeline()
 metrics = load_model_metrics()
 
+def prepare_prediction_data(data):
+    """Adapt raw Streamlit/CSV input to the schema expected by the saved model."""
+    prepared = data.copy()
+    named_steps = getattr(pipeline, 'named_steps', {}) if pipeline is not None else {}
+
+    # The notebook artifact expects engineered columns, while src.train embeds
+    # feature engineering inside the pipeline itself.
+    if 'feature_engineering' not in named_steps:
+        prepared = FeatureEngineeringTransformer().transform(prepared)
+
+    return prepared
+
 # Ambil nama algoritma yang digunakan
 model_algo_name = "Gradient Boosting Classifier"
 if pipeline is not None and hasattr(pipeline, 'steps'):
@@ -438,7 +450,7 @@ with tab_single:
             input_df = pd.DataFrame([input_dict])
 
             with st.spinner("Memproses prediksi..."):
-                prob = pipeline.predict_proba(input_df)[:, 1][0]
+                prob = pipeline.predict_proba(prepare_prediction_data(input_df))[:, 1][0]
                 risk_tier, risk_icon, risk_label_id = get_risk_tier(prob)
 
             st.markdown("---")
@@ -566,7 +578,7 @@ with tab_batch:
                 st.error("Model pipeline belum dimuat!")
             else:
                 with st.spinner("Menghitung prediksi..."):
-                    probs = pipeline.predict_proba(df_batch)[:, 1]
+                    probs = pipeline.predict_proba(prepare_prediction_data(df_batch))[:, 1]
                     res_df = df_batch.copy()
                     res_df['churn_probability'] = np.round(probs, 4)
                     res_df['risk_tier'] = [get_risk_tier(p)[0] for p in probs]
