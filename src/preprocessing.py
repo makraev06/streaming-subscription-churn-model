@@ -24,7 +24,15 @@ class FeatureEngineeringTransformer(BaseEstimator, TransformerMixin):
         
         # 1. tenure_days
         if 'signup_date' in X_out.columns:
-            X_out['tenure_days'] = X_out['signup_date'].abs()
+            X_out['signup_date'] = pd.to_datetime(
+    X_out['signup_date'],
+    errors='coerce'
+)
+            reference_date = pd.Timestamp.today().normalize()
+            X_out['tenure_days'] = (
+    reference_date - X_out['signup_date']
+).dt.days
+            X_out['tenure_days'] = X_out['tenure_days'].clip(lower=0)
             X_out = X_out.drop(columns=['signup_date'])
         
         # 2. listening_intensity
