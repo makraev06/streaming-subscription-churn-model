@@ -545,12 +545,14 @@ with tab_batch:
     st.markdown("### Analisis File CSV Pelanggan")
     st.markdown("Unggah berkas CSV untuk memprediksi risiko churn banyak pelanggan sekaligus.")
 
-    u_col1, u_col2, u_col3 = st.columns([2.5, 1.2, 1.2])
+    u_col1, u_col2, u_col3, u_col4 = st.columns([2.5, 1.2, 1.2, 1.2])
     with u_col1:
         uploaded_file = st.file_uploader("Pilih file CSV", type=["csv"], label_visibility="collapsed")
     with u_col2:
-        load_demo = st.button("Muat 200 Baris Demo", use_container_width=True)
+        load_test = st.button("Muat test.csv (75k)", use_container_width=True)
     with u_col3:
+        load_demo = st.button("Muat 200 Baris Demo", use_container_width=True)
+    with u_col4:
         if os.path.exists('data/sample_test_200_customers.csv'):
             with open('data/sample_test_200_customers.csv', 'rb') as f_sample:
                 sample_data = f_sample.read()
@@ -565,6 +567,9 @@ with tab_batch:
     df_batch = None
     if uploaded_file is not None:
         df_batch = pd.read_csv(uploaded_file)
+    elif load_test and os.path.exists('test.csv'):
+        df_batch = pd.read_csv('test.csv')
+        st.info("test.csv berhasil dimuat: 75.000 baris.")
     elif load_demo and os.path.exists('data/sample_test_200_customers.csv'):
         df_batch = pd.read_csv('data/sample_test_200_customers.csv')
         st.info("Berhasil memuat 200 baris data dari berkas sampel.")
