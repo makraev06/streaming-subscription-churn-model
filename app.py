@@ -564,15 +564,41 @@ with tab_batch:
                 use_container_width=True
             )
 
-    df_batch = None
-    if uploaded_file is not None:
-        df_batch = pd.read_csv(uploaded_file)
-    elif load_test and os.path.exists('test.csv'):
-        df_batch = pd.read_csv('test.csv')
-        st.info("test.csv berhasil dimuat: 75.000 baris.")
-    elif load_demo and os.path.exists('data/sample_test_200_customers.csv'):
-        df_batch = pd.read_csv('data/sample_test_200_customers.csv')
-        st.info("Berhasil memuat 200 baris data dari berkas sampel.")
+    # df_batch = None
+    # if uploaded_file is not None:
+    #     df_batch = pd.read_csv(uploaded_file)
+    # elif load_test and os.path.exists('test.csv'):
+    #     df_batch = pd.read_csv('test.csv')
+    #     st.info("test.csv berhasil dimuat: 75.000 baris.")
+    # elif load_demo and os.path.exists('data/sample_test_200_customers.csv'):
+    #     df_batch = pd.read_csv('data/sample_test_200_customers.csv')
+    #     st.info("Berhasil memuat 200 baris data dari berkas sampel.")
+
+    
+if 'batch_input' not in st.session_state:
+    st.session_state['batch_input'] = None
+
+if uploaded_file is not None:
+    st.session_state['batch_input'] = pd.read_csv(uploaded_file)
+
+elif load_test:
+    if os.path.exists('test.csv'):
+        st.session_state['batch_input'] = pd.read_csv('test.csv')
+        st.success("test.csv berhasil dimuat.")
+    else:
+        st.error("File test.csv tidak ditemukan di folder utama proyek.")
+
+elif load_demo:
+    sample_path = 'data/sample_test_200_customers.csv'
+
+    if os.path.exists(sample_path):
+        st.session_state['batch_input'] = pd.read_csv(sample_path)
+        st.success("200 baris data sampel berhasil dimuat.")
+    else:
+        st.error("File sampel tidak ditemukan.")
+
+    df_batch = st.session_state['batch_input']
+
 
     if df_batch is not None:
         st.markdown(f"**Pratinjau Data ({len(df_batch):,} Baris):**")
